@@ -1,8 +1,8 @@
 <template>
     <div>
         <!-- Welcome Header -->
-        <div class="d-flex justify-space-between align-center mb-6">
-            <div>
+        <div class="d-flex justify-space-between align-center mb-6" :class="{'flex-column align-start': mobile}">
+            <div :class="{'mb-4': mobile}">
                 <h1 class="text-h4 font-weight-bold text-on-background">Dashboard</h1>
                 <p class="text-body-2 text-medium-emphasis mt-1">Welcome back! Here's your business overview.</p>
             </div>
@@ -11,6 +11,7 @@
                 prepend-icon="mdi-plus"
                 to="/bills/create"
                 size="large"
+                :block="mobile"
             >
                 Create New Bill
             </v-btn>
@@ -367,12 +368,14 @@
 
 <script setup>
 import { ref, computed, onMounted, inject } from 'vue';
+import { useDisplay } from 'vuetify';
 import { useBillStore } from '../stores/bill';
 import PartyDialog from '../components/PartyDialog.vue';
 import ProductDialog from '../components/ProductDialog.vue';
 
 const billStore = useBillStore();
 const showSnackbar = inject('showSnackbar');
+const { mobile } = useDisplay();
 
 const loading = ref(true);
 const stats = ref({

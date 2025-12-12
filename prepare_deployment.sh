@@ -16,13 +16,11 @@ zip -r billing-software_deploy.zip . \
     -x "node_modules/*" \
     -x ".git/*" \
     -x "tests/*" \
-    -x ".env" \
-    -x ".env.backup" \
-    -x ".env.restore_backup" \
-    -x "billing-software_deploy.zip" \
-    -x ".idea/*" \
-    -x ".vscode/*" \
-    -x "storage/logs/*.log"
+    -x "storage/logs/*" \
+    -x "storage/framework/cache/*" \
+    -x "storage/framework/views/*" \
+    -x "storage/framework/sessions/*" \
+    -x "billing-software_deploy.zip"
 
 echo "✅ Deployment Package Created: billing-software_deploy.zip"
 echo "📝 Next Steps:"

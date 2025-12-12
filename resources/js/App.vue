@@ -4,8 +4,9 @@
         <v-navigation-drawer
             v-if="isAuthenticated"
             v-model="drawer"
-            :rail="rail"
-            permanent
+            :rail="!mobile && rail"
+            :temporary="mobile"
+            :permanent="!mobile"
             class="border-e"
         >
             <!-- Logo & Brand -->
@@ -86,10 +87,10 @@
             <v-btn
                 icon
                 variant="text"
-                @click="rail = !rail"
+                @click="toggleDrawer"
                 class="ml-2"
             >
-                <v-icon>{{ rail ? 'mdi-menu' : 'mdi-menu-open' }}</v-icon>
+                <v-icon>{{ (!mobile && rail) || (mobile && !drawer) ? 'mdi-menu' : 'mdi-menu-open' }}</v-icon>
             </v-btn>
 
             <v-breadcrumbs :items="breadcrumbs" class="text-body-2">
@@ -156,7 +157,7 @@
 
         <!-- Main Content -->
         <v-main class="bg-background">
-            <v-container fluid class="pa-6">
+            <v-container fluid :class="mobile ? 'pa-4' : 'pa-6'">
                 <router-view v-slot="{ Component }">
                     <transition name="fade" mode="out-in">
                         <component :is="Component" />
@@ -191,13 +192,30 @@ import { ref, computed, provide, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from './stores/auth';
 
+import { useDisplay } from 'vuetify';
+
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+const { mobile } = useDisplay();
 
-const drawer = ref(true);
+const drawer = ref(!mobile.value);
 const rail = ref(false);
 const theme = ref(localStorage.getItem('theme') || 'light');
+
+// Sync drawer state with screen size
+watch(mobile, (val) => {
+    drawer.value = !val;
+    if (val) rail.value = false;
+});
+
+const toggleDrawer = () => {
+    if (mobile.value) {
+        drawer.value = !drawer.value;
+    } else {
+        rail.value = !rail.value;
+    }
+};
 
 const snackbar = ref({
     show: false,
