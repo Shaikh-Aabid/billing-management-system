@@ -70,6 +70,12 @@ const routes = [
         meta: { requiresAuth: true },
     },
     {
+        path: '/bills/edit/:id',
+        name: 'edit-bill',
+        component: CreateBill,
+        meta: { requiresAuth: true },
+    },
+    {
         path: '/eway-bills',
         name: 'eway-bills',
         component: EwayBills,

@@ -136,13 +136,90 @@ class BillController extends Controller
         $this->authorize('update', $bill);
 
         $validated = $request->validate([
+            'party_id' => ['nullable', 'exists:parties,id'],
+            'bill_date' => ['nullable', 'date'],
+            'bill_type' => ['nullable', 'in:invoice,quotation,delivery_challan'],
+            'is_inter_state' => ['nullable', 'boolean'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'status' => ['nullable', 'in:draft,sent,paid,cancelled'],
+            'items' => ['nullable', 'array', 'min:1'],
+            'items.*.product_id' => ['required_with:items', 'exists:products,id'],
+            'items.*.hsn_code' => ['required_with:items', 'string'],
+            'items.*.quantity' => ['required_with:items', 'numeric', 'min:0.001'],
+            'items.*.price' => ['required_with:items', 'numeric', 'min:0'],
+            'items.*.gst_rate' => ['required_with:items', 'numeric', 'in:0,5,12,18,28'],
         ]);
 
-        $bill->update($validated);
+        DB::beginTransaction();
+        try {
+            // Update main bill details
+            $bill->update(collect($validated)->except('items')->toArray());
 
-        return response()->json($bill->load(['party', 'items.product']));
+            // Update items if provided
+            if ($request->has('items')) {
+                // Delete existing items
+                $bill->items()->delete();
+
+                $subtotal = 0;
+                $cgst = 0;
+                $sgst = 0;
+                $igst = 0;
+
+                foreach ($validated['items'] as $itemData) {
+                    $product = $request->user()->products()->findOrFail($itemData['product_id']);
+
+                    $itemSubtotal = $itemData['quantity'] * $itemData['price'];
+                    $itemGst = $itemSubtotal * ($itemData['gst_rate'] / 100);
+
+                    $itemCgst = 0;
+                    $itemSgst = 0;
+                    $itemIgst = 0;
+
+                    if ($bill->is_inter_state) {
+                        $itemIgst = $itemGst;
+                        $igst += $itemGst;
+                    } else {
+                        $itemCgst = $itemGst / 2;
+                        $itemSgst = $itemGst / 2;
+                        $cgst += $itemGst / 2;
+                        $sgst += $itemGst / 2;
+                    }
+
+                    $subtotal += $itemSubtotal;
+
+                    $bill->items()->create([
+                        'product_id' => $itemData['product_id'],
+                        'hsn_code' => $itemData['hsn_code'],
+                        'quantity' => $itemData['quantity'],
+                        'unit' => $product->unit,
+                        'price' => $itemData['price'],
+                        'gst_rate' => $itemData['gst_rate'],
+                        'cgst' => $itemCgst,
+                        'sgst' => $itemSgst,
+                        'igst' => $itemIgst,
+                        'amount' => $itemSubtotal + $itemGst,
+                    ]);
+                }
+
+                $gstAmount = $cgst + $sgst + $igst;
+
+                $bill->update([
+                    'subtotal' => $subtotal,
+                    'cgst' => $cgst,
+                    'sgst' => $sgst,
+                    'igst' => $igst,
+                    'gst_amount' => $gstAmount,
+                    'total_amount' => $subtotal + $gstAmount,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json($bill->load(['party', 'items.product']));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     public function destroy(Request $request, Bill $bill)

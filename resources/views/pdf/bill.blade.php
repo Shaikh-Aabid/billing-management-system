@@ -424,6 +424,7 @@
                     <td class="disc"></td>
                     <td class="amount">{{ number_format($itemSubtotal, 2) }}</td>
                 </tr>
+                @if($bill->gst_amount > 0)
                 <tr class="gst-row">
                     <td class="sl"></td>
                     <td class="desc gst-label">
@@ -455,6 +456,7 @@
                         @endif
                     </td>
                 </tr>
+                @endif
                 @endforeach
 
                 <!-- Empty rows for spacing -->
@@ -510,6 +512,7 @@
             </div>
         </div>
 
+        @if($bill->gst_amount > 0)
         <!-- HSN/SAC Summary Table -->
         <table class="hsn-summary">
             <thead>
@@ -589,6 +592,7 @@
             @endphp
             <strong>INR {{ $taxWords }} Only</strong>
         </div>
+        @endif
 
         <!-- Footer Section -->
         <div class="footer-section">

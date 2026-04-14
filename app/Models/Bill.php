@@ -88,7 +88,7 @@ class Bill extends Model
 
         $sequence = $lastBill ? intval(substr($lastBill->bill_number, -4)) + 1 : 1;
 
-        return sprintf('%s/%s%s/%04d', $prefix, $year, $month, $sequence);
+        return sprintf('%s-%04d', $prefix, $sequence);
     }
 
     public function user(): BelongsTo

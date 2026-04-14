@@ -47,7 +47,7 @@
                         <v-btn
                             color="primary"
                             :loading="savingBusiness"
-                            :disabled="!businessValid"
+                            :disabled="!businessValid || !isBusinessDirty"
                             @click="saveBusinessSettings"
                         >
                             Save Business Info
@@ -199,7 +199,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue';
+import { ref, computed, onMounted, inject } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 
@@ -228,6 +228,12 @@ const businessSettings = ref({
     phone: '',
     email: '',
     state_code: '',
+});
+
+const originalBusinessSettings = ref(null);
+const isBusinessDirty = computed(() => {
+    if (!originalBusinessSettings.value) return false;
+    return JSON.stringify(businessSettings.value) !== JSON.stringify(originalBusinessSettings.value);
 });
 
 const accountSettings = ref({
@@ -274,11 +280,17 @@ const loadSettings = async () => {
     try {
         const response = await axios.get('/settings');
         businessSettings.value = { ...businessSettings.value, ...response.data.business };
+        originalBusinessSettings.value = { ...businessSettings.value }; // Track original state
         billSettings.value = { ...billSettings.value, ...response.data.bill };
         accountSettings.value = {
             name: authStore.user?.name || '',
             email: authStore.user?.email || '',
         };
+
+        // Force validation after DOM update to enable/disable button correctly
+        setTimeout(() => {
+            if (businessForm.value) businessForm.value.validate();
+        }, 100);
     } catch (error) {
         console.error('Failed to load settings:', error);
     }
@@ -288,6 +300,7 @@ const saveBusinessSettings = async () => {
     savingBusiness.value = true;
     try {
         await axios.put('/settings/business', businessSettings.value);
+        originalBusinessSettings.value = { ...businessSettings.value }; // Update original state
         showSnackbar('Business settings saved!', 'success');
     } catch (error) {
         showSnackbar('Failed to save settings', 'error');

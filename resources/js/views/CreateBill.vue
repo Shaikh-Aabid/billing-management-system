@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="d-flex justify-space-between align-center mb-6">
-            <h1 class="text-h4">Create New Bill</h1>
+            <h1 class="text-h4">{{ isEdit ? 'Edit Bill' : 'Create New Bill' }}</h1>
             <v-btn variant="text" prepend-icon="mdi-arrow-left" to="/bills">
                 Back to Bills
             </v-btn>
@@ -280,7 +280,7 @@
                                 :disabled="!valid || billData.items.length === 0"
                                 @click="saveBill"
                             >
-                                Create Bill
+                                {{ isEdit ? 'Update Bill' : 'Create Bill' }}
                             </v-btn>
                             <v-btn
                                 color="secondary"
@@ -307,17 +307,22 @@
 
 <script setup>
 import { ref, computed, onMounted, inject, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { usePartyStore } from '../stores/party';
 import { useProductStore } from '../stores/product';
 import { useBillStore } from '../stores/bill';
 import PartyDialog from '../components/PartyDialog.vue';
 
 const router = useRouter();
+const route = useRoute();
 const partyStore = usePartyStore();
 const productStore = useProductStore();
 const billStore = useBillStore();
 const showSnackbar = inject('showSnackbar');
+
+const isEdit = computed(() => !!route.params.id);
+const billId = computed(() => route.params.id);
+const loadingBill = ref(false);
 
 const form = ref(null);
 const valid = ref(false);
@@ -405,6 +410,34 @@ const loadProducts = async () => {
     }
 };
 
+const loadBill = async () => {
+    if (!isEdit.value) return;
+
+    loadingBill.value = true;
+    try {
+        const bill = await billStore.fetchBill(billId.value);
+        billData.value = {
+            party_id: bill.party_id,
+            bill_date: bill.bill_date.split('T')[0],
+            notes: bill.notes || '',
+            is_out_of_maharashtra: !!bill.is_inter_state,
+            items: bill.items.map(item => ({
+                product_id: item.product_id,
+                hsn_code: item.hsn_code,
+                quantity: item.quantity,
+                price: item.price,
+                gst_rate: item.gst_rate,
+                amount: item.amount,
+            })),
+        };
+        onPartyChange();
+    } catch (error) {
+        showSnackbar('Failed to load bill details', 'error');
+    } finally {
+        loadingBill.value = false;
+    }
+};
+
 const onPartyChange = () => {
     selectedParty.value = parties.value.find(p => p.id === billData.value.party_id);
 };
@@ -469,19 +502,26 @@ const saveBill = async () => {
             is_inter_state: isInterState.value,
         };
 
-        const bill = await billStore.createBill(payload);
-        showSnackbar('Bill created successfully!', 'success');
-        router.push(`/bills/${bill.id}`);
+        if (isEdit.value) {
+            await billStore.updateBill(billId.value, payload);
+            showSnackbar('Bill updated successfully!', 'success');
+        } else {
+            const bill = await billStore.createBill(payload);
+            showSnackbar('Bill created successfully!', 'success');
+        }
+        router.push(isEdit.value ? `/bills/${billId.value}` : '/bills');
     } catch (error) {
-        showSnackbar(error.response?.data?.message || 'Failed to create bill', 'error');
+        showSnackbar(error.response?.data?.message || `Failed to ${isEdit.value ? 'update' : 'create'} bill`, 'error');
     } finally {
         saving.value = false;
     }
 };
 
-onMounted(() => {
-    loadParties();
-    loadProducts();
+onMounted(async () => {
+    await Promise.all([loadParties(), loadProducts()]);
+    if (isEdit.value) {
+        loadBill();
+    }
 });
 </script>
 

@@ -44,6 +44,14 @@
                 >
                     Cancel Bill
                 </v-btn>
+                <v-btn
+                    color="primary"
+                    prepend-icon="mdi-pencil"
+                    class="mr-2"
+                    :to="`/bills/edit/${bill?.id}`"
+                >
+                    Edit
+                </v-btn>
                 <v-btn variant="text" prepend-icon="mdi-arrow-left" to="/bills">
                     Back
                 </v-btn>
@@ -177,58 +185,52 @@
                                 </template>
                             </v-list-item>
 
-                            <v-divider></v-divider>
-
-                            <v-list-item>
-                                <template v-slot:prepend>
-                                    <span>Subtotal:</span>
+                            <template v-if="bill.gst_amount > 0">
+                                <v-divider></v-divider>
+                                <template v-if="bill.is_inter_state">
+                                    <v-list-item>
+                                        <template v-slot:prepend>
+                                            <span>IGST:</span>
+                                        </template>
+                                        <template v-slot:append>
+                                            <span>{{ formatCurrency(bill.igst) }}</span>
+                                        </template>
+                                    </v-list-item>
                                 </template>
-                                <template v-slot:append>
-                                    <span>{{ formatCurrency(bill.subtotal) }}</span>
+                                <template v-else>
+                                    <v-list-item>
+                                        <template v-slot:prepend>
+                                            <span>CGST:</span>
+                                        </template>
+                                        <template v-slot:append>
+                                            <span>{{ formatCurrency(bill.cgst) }}</span>
+                                        </template>
+                                    </v-list-item>
+                                    <v-list-item>
+                                        <template v-slot:prepend>
+                                            <span>SGST:</span>
+                                        </template>
+                                        <template v-slot:append>
+                                            <span>{{ formatCurrency(bill.sgst) }}</span>
+                                        </template>
+                                    </v-list-item>
                                 </template>
-                            </v-list-item>
+                            </template>
 
-                            <template v-if="bill.is_inter_state">
+                            <template v-if="bill.gst_amount > 0">
+                                <v-divider></v-divider>
+
                                 <v-list-item>
                                     <template v-slot:prepend>
-                                        <span>IGST:</span>
+                                        <span>Total GST:</span>
                                     </template>
                                     <template v-slot:append>
-                                        <span>{{ formatCurrency(bill.igst) }}</span>
+                                        <span class="text-warning font-weight-bold">
+                                            {{ formatCurrency(bill.gst_amount) }}
+                                        </span>
                                     </template>
                                 </v-list-item>
                             </template>
-                            <template v-else>
-                                <v-list-item>
-                                    <template v-slot:prepend>
-                                        <span>CGST:</span>
-                                    </template>
-                                    <template v-slot:append>
-                                        <span>{{ formatCurrency(bill.cgst) }}</span>
-                                    </template>
-                                </v-list-item>
-                                <v-list-item>
-                                    <template v-slot:prepend>
-                                        <span>SGST:</span>
-                                    </template>
-                                    <template v-slot:append>
-                                        <span>{{ formatCurrency(bill.sgst) }}</span>
-                                    </template>
-                                </v-list-item>
-                            </template>
-
-                            <v-divider></v-divider>
-
-                            <v-list-item>
-                                <template v-slot:prepend>
-                                    <span>Total GST:</span>
-                                </template>
-                                <template v-slot:append>
-                                    <span class="text-warning font-weight-bold">
-                                        {{ formatCurrency(bill.gst_amount) }}
-                                    </span>
-                                </template>
-                            </v-list-item>
 
                             <v-divider></v-divider>
 
