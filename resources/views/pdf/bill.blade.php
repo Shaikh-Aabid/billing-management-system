@@ -301,6 +301,12 @@
                 @if($user->state)
                 <p>State Name : {{ $user->state }}{{ $user->state_code ? ', Code : '.$user->state_code : '' }}</p>
                 @endif
+                @if($user->phone)
+                <p>Contact No: {{ $user->phone }}</p>
+                @endif
+                @if($user->email)
+                <p>Email: {{ $user->email }}</p>
+                @endif
 
                 <!-- Buyer Section -->
                 <div class="buyer-section">
