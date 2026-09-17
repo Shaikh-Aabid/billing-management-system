@@ -195,6 +195,46 @@
                 </v-card>
             </v-col>
         </v-row>
+        <!-- Branding & Images -->
+        <v-row class="mt-4">
+            <v-col cols="12" md="12">
+                <v-card>
+                    <v-card-title>Branding & Images</v-card-title>
+                    <v-card-text>
+                        <v-row>
+                            <v-col cols="12" md="6">
+                                <v-file-input
+                                    v-model="logoFile"
+                                    accept="image/*"
+                                    label="Business Logo"
+                                    prepend-icon="mdi-image"
+                                    @change="uploadImage('logo')"
+                                    :loading="uploadingLogo"
+                                    variant="outlined"
+                                ></v-file-input>
+                                <div v-if="imageSettings.business_logo" class="mb-4 text-center">
+                                    <v-img :src="imageSettings.business_logo" max-height="150" contain></v-img>
+                                </div>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                                <v-file-input
+                                    v-model="signatureFile"
+                                    accept="image/*"
+                                    label="Authorised Signature / Stamp"
+                                    prepend-icon="mdi-draw-pen"
+                                    @change="uploadImage('signature')"
+                                    :loading="uploadingSignature"
+                                    variant="outlined"
+                                ></v-file-input>
+                                <div v-if="imageSettings.business_signature" class="mb-4 text-center">
+                                    <v-img :src="imageSettings.business_signature" max-height="150" contain></v-img>
+                                </div>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
+            </v-col>
+        </v-row>
     </div>
 </template>
 
@@ -254,6 +294,16 @@ const billSettings = ref({
     bank_details: '',
 });
 
+const imageSettings = ref({
+    business_logo: null,
+    business_signature: null,
+});
+
+const logoFile = ref(null);
+const signatureFile = ref(null);
+const uploadingLogo = ref(false);
+const uploadingSignature = ref(false);
+
 const gstRates = [0, 5, 12, 18, 28];
 
 const gstinRules = [
@@ -282,6 +332,14 @@ const loadSettings = async () => {
         businessSettings.value = { ...businessSettings.value, ...response.data.business };
         originalBusinessSettings.value = { ...businessSettings.value }; // Track original state
         billSettings.value = { ...billSettings.value, ...response.data.bill };
+        
+        if (response.data.images) {
+            imageSettings.value = {
+                business_logo: response.data.images.business_logo ? '/storage/' + response.data.images.business_logo : null,
+                business_signature: response.data.images.business_signature ? '/storage/' + response.data.images.business_signature : null,
+            };
+        }
+
         accountSettings.value = {
             name: authStore.user?.name || '',
             email: authStore.user?.email || '',
@@ -348,6 +406,39 @@ const saveBillSettings = async () => {
         showSnackbar('Failed to save bill settings', 'error');
     } finally {
         savingBillSettings.value = false;
+    }
+};
+
+const uploadImage = async (type) => {
+    const file = type === 'logo' ? logoFile.value : signatureFile.value;
+    if (!file) return;
+
+    if (type === 'logo') uploadingLogo.value = true;
+    else uploadingSignature.value = true;
+
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('type', type);
+
+    try {
+        const response = await axios.post('/settings/upload-image', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        
+        if (type === 'logo') {
+            imageSettings.value.business_logo = response.data.url;
+        } else {
+            imageSettings.value.business_signature = response.data.url;
+        }
+        
+        showSnackbar(response.data.message, 'success');
+    } catch (error) {
+        showSnackbar(error.response?.data?.message || `Failed to upload ${type}`, 'error');
+    } finally {
+        if (type === 'logo') uploadingLogo.value = false;
+        else uploadingSignature.value = false;
     }
 };
 

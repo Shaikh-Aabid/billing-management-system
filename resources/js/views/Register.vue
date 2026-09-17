@@ -233,12 +233,27 @@ const handleRegister = async () => {
 
 <style scoped>
 .register-container {
-    background: linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 50%, #F1F5F9 100%);
+    background: linear-gradient(135deg, rgba(var(--v-theme-secondary), 0.1) 0%, rgba(var(--v-theme-primary), 0.1) 100%), var(--v-theme-background);
     min-height: 100vh;
 }
 
 .register-card {
-    border: 1px solid rgba(99, 102, 241, 0.1) !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(99, 102, 241, 0.1) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+    background: rgba(var(--v-theme-surface), 0.95) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.register-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.2) !important;
+}
+
+.v-theme--dark .register-card {
+    background: rgba(var(--v-theme-surface), 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
 }
 </style>

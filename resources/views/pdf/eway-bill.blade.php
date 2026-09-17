@@ -271,6 +271,11 @@
         <div class="header-section">
             <!-- Left: Company & Buyer Info -->
             <div class="company-info">
+                @if($user->getSetting('business_logo') && file_exists(storage_path('app/public/' . $user->getSetting('business_logo'))))
+                <div style="margin-bottom: 10px;">
+                    <img src="{{ storage_path('app/public/' . $user->getSetting('business_logo')) }}" alt="Logo" style="max-height: 60px; max-width: 200px;">
+                </div>
+                @endif
                 <div class="company-name">{{ $user->business_name ?? $user->name }}</div>
                 @if($user->address)
                 <p>{{ $user->address }}</p>
@@ -606,6 +611,13 @@
             </div>
             <div class="signature-section">
                 <p class="signature-company">for {{ $user->business_name ?? $user->name }}</p>
+                @if($user->getSetting('business_signature') && file_exists(storage_path('app/public/' . $user->getSetting('business_signature'))))
+                <div style="margin: 10px 0;">
+                    <img src="{{ storage_path('app/public/' . $user->getSetting('business_signature')) }}" alt="Signature" style="max-height: 50px; max-width: 150px;">
+                </div>
+                @else
+                <div style="height: 50px;"></div>
+                @endif
                 <p class="signature-line">Authorised Signatory</p>
             </div>
         </div>
