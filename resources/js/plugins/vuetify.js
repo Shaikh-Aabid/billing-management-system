@@ -13,33 +13,33 @@ const vuetify = createVuetify({
             light: {
                 dark: false,
                 colors: {
-                    background: '#F8FAFC',
+                    background: '#F9FAFB',
                     surface: '#FFFFFF',
-                    'surface-variant': '#F1F5F9',
-                    primary: '#6366F1',
-                    'primary-darken-1': '#4F46E5',
-                    secondary: '#8B5CF6',
-                    'secondary-darken-1': '#7C3AED',
-                    accent: '#EC4899',
+                    'surface-variant': '#F3F4F6',
+                    primary: '#4F46E5', // Indigo
+                    'primary-darken-1': '#4338CA',
+                    secondary: '#10B981', // Emerald
+                    'secondary-darken-1': '#059669',
+                    accent: '#8B5CF6',
                     error: '#EF4444',
                     info: '#3B82F6',
                     success: '#10B981',
                     warning: '#F59E0B',
-                    'on-background': '#1E293B',
-                    'on-surface': '#334155',
+                    'on-background': '#111827',
+                    'on-surface': '#1F2937',
                 },
             },
             dark: {
                 dark: true,
                 colors: {
-                    background: '#0F172A',
-                    surface: '#1E293B',
-                    'surface-variant': '#334155',
-                    primary: '#818CF8',
-                    'primary-darken-1': '#6366F1',
-                    secondary: '#A78BFA',
-                    'secondary-darken-1': '#8B5CF6',
-                    accent: '#F472B6',
+                    background: '#09090b', // Zinc 950
+                    surface: '#18181b', // Zinc 900
+                    'surface-variant': '#27272a',
+                    primary: '#6366F1', // Indigo 500
+                    'primary-darken-1': '#4F46E5',
+                    secondary: '#34D399', // Emerald 400
+                    'secondary-darken-1': '#10B981',
+                    accent: '#A78BFA',
                     error: '#F87171',
                     info: '#60A5FA',
                     success: '#34D399',
@@ -50,13 +50,14 @@ const vuetify = createVuetify({
     },
     defaults: {
         VCard: {
-            elevation: 0,
+            elevation: 2,
             rounded: 'xl',
-            class: 'border',
+            class: 'card-hover',
         },
         VBtn: {
-            rounded: 'lg',
+            rounded: 'pill',
             elevation: 0,
+            class: 'btn-hover',
         },
         VTextField: {
             variant: 'outlined',

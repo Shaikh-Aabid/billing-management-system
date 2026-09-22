@@ -7,7 +7,7 @@
             :rail="!mobile && rail"
             :temporary="mobile"
             :permanent="!mobile"
-            class="border-e"
+            class="glassmorphism-drawer border-e"
         >
             <!-- Logo & Brand -->
             <div class="pa-4 d-flex align-center" v-if="!rail">
@@ -57,8 +57,8 @@
                     :to="item.to"
                     :value="item.title"
                     color="primary"
-                    rounded="lg"
-                    class="mb-1"
+                    rounded="pill"
+                    class="mb-1 nav-item-hover"
                 >
                 </v-list-item>
             </v-list>
@@ -83,7 +83,7 @@
         </v-navigation-drawer>
 
         <!-- App Bar -->
-        <v-app-bar v-if="isAuthenticated" flat class="border-b" color="surface">
+        <v-app-bar v-if="isAuthenticated" flat class="glassmorphism-app-bar border-b">
             <v-btn
                 icon
                 variant="text"
@@ -294,6 +294,7 @@ html {
 
 .v-list-item--active {
     background: rgba(var(--v-theme-primary), 0.1) !important;
+    font-weight: 600 !important;
 }
 
 .border {
@@ -301,11 +302,55 @@ html {
 }
 
 .border-e {
-    border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+    border-right: 1px solid rgba(var(--v-border-color), 0.05) !important;
 }
 
 .border-b {
-    border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+    border-bottom: 1px solid rgba(var(--v-border-color), 0.05) !important;
+}
+
+/* Glassmorphism */
+.glassmorphism-drawer {
+    background: rgba(var(--v-theme-surface), 0.85) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.glassmorphism-app-bar {
+    background: rgba(var(--v-theme-background), 0.85) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Hover Animations */
+.card-hover {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -8px rgba(var(--v-theme-on-surface), 0.15) !important;
+}
+
+.v-theme--dark .card-hover:hover {
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.5) !important;
+}
+
+.btn-hover {
+    transition: transform 0.15s ease !important;
+}
+
+.btn-hover:active {
+    transform: scale(0.95);
+}
+
+.nav-item-hover {
+    transition: all 0.2s ease !important;
+}
+
+.nav-item-hover:hover:not(.v-list-item--active) {
+    background: rgba(var(--v-theme-primary), 0.05) !important;
+    padding-left: 20px !important;
 }
 
 /* Custom Tooltip Styles for better visibility */

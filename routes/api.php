@@ -44,4 +44,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/settings/account', [SettingsController::class, 'updateAccount']);
     Route::put('/settings/password', [SettingsController::class, 'updatePassword']);
     Route::put('/settings/bill', [SettingsController::class, 'updateBillSettings']);
+    Route::post('/settings/upload-image', [SettingsController::class, 'uploadImage']);
 });

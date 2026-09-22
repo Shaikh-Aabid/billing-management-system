@@ -100,13 +100,13 @@
                             <v-table density="comfortable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 30%">Product</th>
-                                        <th style="width: 10%">HSN</th>
-                                        <th style="width: 10%">Qty</th>
-                                        <th style="width: 15%">Price</th>
-                                        <th style="width: 10%">GST %</th>
-                                        <th style="width: 15%">Amount</th>
-                                        <th style="width: 10%">Actions</th>
+                                        <th style="min-width: 250px">Product</th>
+                                        <th style="min-width: 120px">HSN</th>
+                                        <th style="min-width: 120px">Qty</th>
+                                        <th style="min-width: 150px">Price</th>
+                                        <th style="min-width: 120px">GST %</th>
+                                        <th style="min-width: 150px">Amount</th>
+                                        <th style="min-width: 80px">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>

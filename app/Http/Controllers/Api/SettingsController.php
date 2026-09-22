@@ -31,6 +31,10 @@ class SettingsController extends Controller
                 'terms_conditions' => $user->getSetting('terms_conditions', ''),
                 'bank_details' => $user->getSetting('bank_details', ''),
             ],
+            'images' => [
+                'business_logo' => $user->getSetting('business_logo'),
+                'business_signature' => $user->getSetting('business_signature'),
+            ]
         ]);
     }
 
@@ -104,6 +108,29 @@ class SettingsController extends Controller
 
         return response()->json([
             'message' => 'Bill settings updated successfully.',
+        ]);
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'type' => ['required', 'string', 'in:logo,signature'],
+        ]);
+
+        $user = $request->user();
+        $type = $request->input('type');
+        $settingKey = $type === 'logo' ? 'business_logo' : 'business_signature';
+
+        $file = $request->file('image');
+        $path = $file->store('uploads/' . $type, 'public');
+
+        $user->setSetting($settingKey, $path);
+
+        return response()->json([
+            'message' => ucfirst($type) . ' uploaded successfully.',
+            'path' => $path,
+            'url' => asset('storage/' . $path)
         ]);
     }
 }
