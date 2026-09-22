@@ -38,6 +38,7 @@ class BillController extends Controller
     {
         $validated = $request->validate([
             'party_id' => ['required', 'exists:parties,id'],
+            'bill_number' => ['nullable', 'string', 'max:50', 'unique:bills,bill_number,NULL,id,user_id,' . $request->user()->id],
             'bill_date' => ['required', 'date'],
             'bill_type' => ['nullable', 'in:invoice,quotation,delivery_challan'],
             'is_inter_state' => ['nullable', 'boolean'],
@@ -57,6 +58,7 @@ class BillController extends Controller
         try {
             $bill = $request->user()->bills()->create([
                 'party_id' => $validated['party_id'],
+                'bill_number' => $validated['bill_number'] ?? null,
                 'bill_date' => $validated['bill_date'],
                 'bill_type' => $validated['bill_type'] ?? 'invoice',
                 'is_inter_state' => $validated['is_inter_state'] ?? false,
@@ -137,6 +139,7 @@ class BillController extends Controller
 
         $validated = $request->validate([
             'party_id' => ['nullable', 'exists:parties,id'],
+            'bill_number' => ['nullable', 'string', 'max:50', 'unique:bills,bill_number,' . $bill->id . ',id,user_id,' . $request->user()->id],
             'bill_date' => ['nullable', 'date'],
             'bill_type' => ['nullable', 'in:invoice,quotation,delivery_challan'],
             'is_inter_state' => ['nullable', 'boolean'],

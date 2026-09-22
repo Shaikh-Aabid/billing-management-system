@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Bills
     Route::get('/bills/stats', [BillController::class, 'stats']);
+    Route::get('/bills/next-number', [BillController::class, 'nextNumber']);
     Route::get('/bills/{bill}/pdf', [BillController::class, 'pdf']);
     Route::post('/bills/{bill}/eway-bill', [EwayBillController::class, 'store']);
     Route::apiResource('/bills', BillController::class);

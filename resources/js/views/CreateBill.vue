@@ -15,7 +15,7 @@
                         <v-card-title>Bill Details</v-card-title>
                         <v-card-text>
                             <v-row>
-                                <v-col cols="12" md="6">
+                                <v-col cols="12" md="4">
                                     <v-autocomplete
                                         v-model="billData.party_id"
                                         :items="parties"
@@ -36,7 +36,16 @@
                                         </template>
                                     </v-autocomplete>
                                 </v-col>
-                                <v-col cols="12" md="6">
+                                <v-col cols="12" md="4">
+                                    <v-text-field
+                                        v-model="billData.bill_number"
+                                        label="Bill Number"
+                                        :placeholder="loadingNextNumber ? 'Loading...' : ''"
+                                        :loading="loadingNextNumber"
+                                        :rules="[v => !!v || 'Bill number is required']"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="12" md="4">
                                     <v-text-field
                                         v-model="billData.bill_date"
                                         label="Bill Date"
@@ -307,6 +316,7 @@
 
 <script setup>
 import { ref, computed, onMounted, inject, watch } from 'vue';
+import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import { usePartyStore } from '../stores/party';
 import { useProductStore } from '../stores/product';
@@ -323,6 +333,7 @@ const showSnackbar = inject('showSnackbar');
 const isEdit = computed(() => !!route.params.id);
 const billId = computed(() => route.params.id);
 const loadingBill = ref(false);
+const loadingNextNumber = ref(false);
 
 const form = ref(null);
 const valid = ref(false);
@@ -336,6 +347,7 @@ const selectedParty = ref(null);
 
 const billData = ref({
     party_id: null,
+    bill_number: '',
     bill_date: new Date().toISOString().split('T')[0],
     notes: '',
     is_out_of_maharashtra: false,
@@ -418,6 +430,7 @@ const loadBill = async () => {
         const bill = await billStore.fetchBill(billId.value);
         billData.value = {
             party_id: bill.party_id,
+            bill_number: bill.bill_number,
             bill_date: bill.bill_date.split('T')[0],
             notes: bill.notes || '',
             is_out_of_maharashtra: !!bill.is_inter_state,
@@ -435,6 +448,19 @@ const loadBill = async () => {
         showSnackbar('Failed to load bill details', 'error');
     } finally {
         loadingBill.value = false;
+    }
+};
+
+const fetchNextNumber = async () => {
+    if (isEdit.value) return;
+    loadingNextNumber.value = true;
+    try {
+        const response = await axios.get('/bills/next-number');
+        billData.value.bill_number = response.data.bill_number;
+    } catch (error) {
+        console.error('Failed to fetch next bill number', error);
+    } finally {
+        loadingNextNumber.value = false;
     }
 };
 
@@ -472,12 +498,14 @@ const removeItem = (index) => {
 const resetForm = () => {
     billData.value = {
         party_id: null,
+        bill_number: '',
         bill_date: new Date().toISOString().split('T')[0],
         notes: '',
         is_out_of_maharashtra: false,
         items: [createEmptyItem()],
     };
     selectedParty.value = null;
+    fetchNextNumber();
 };
 
 const onNewPartySaved = async (party) => {
@@ -521,6 +549,8 @@ onMounted(async () => {
     await Promise.all([loadParties(), loadProducts()]);
     if (isEdit.value) {
         loadBill();
+    } else {
+        fetchNextNumber();
     }
 });
 </script>

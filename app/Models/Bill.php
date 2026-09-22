@@ -58,7 +58,6 @@ class Bill extends Model
         $user = User::find($userId);
         $prefix = $user->getSetting('bill_prefix', 'INV');
         $year = date('Y');
-        $month = date('m');
 
         // First, check if there's a cancelled bill whose number can be reused
         $cancelledBill = self::where('user_id', $userId)
@@ -70,13 +69,18 @@ class Bill extends Model
 
         if ($cancelledBill) {
             // Reuse the cancelled bill's number
-            $reusedNumber = $cancelledBill->bill_number;
+            $reusedOriginalNumber = $cancelledBill->bill_number;
+            // Extract the sequence from the old number (last 4 digits)
+            $sequence = intval(substr($reusedOriginalNumber, -4));
+            
             // Save original number to cancelled_bill_number and clear bill_number
             $cancelledBill->update([
-                'cancelled_bill_number' => $reusedNumber,
+                'cancelled_bill_number' => $reusedOriginalNumber,
                 'bill_number' => null,
             ]);
-            return $reusedNumber;
+
+            // Return the reused sequence in the new format
+            return sprintf('%s-%04d', $prefix, $sequence);
         }
 
         // No cancelled bill to reuse, generate next sequential number

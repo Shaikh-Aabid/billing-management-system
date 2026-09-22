@@ -24,6 +24,7 @@ class User extends Authenticatable
         'state_code',
         'pincode',
         'phone',
+        'stamp_path',
     ];
 
     protected $hidden = [
